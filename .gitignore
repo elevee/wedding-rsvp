@@ -1,9 +1,9 @@
-/vendor
+rsvp/vendor
 
 composer.phar
 
 .DS_Store
 
-/node_modules
+rsvp/node_modules
 
 client_secret.json
