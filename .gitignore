@@ -8,3 +8,4 @@ composer.lock
 rsvp/node_modules
 
 client_secret.json
+rsvp-config.php
