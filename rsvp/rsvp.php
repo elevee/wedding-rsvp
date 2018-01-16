@@ -3,7 +3,7 @@ date_default_timezone_set('America/Los_Angeles');
 header('Content-type:application/json;charset=utf-8');
 
 require_once __DIR__ . '/vendor/autoload.php';
-require_once __DIR__ . '/rsvp-config.php';
+require_once __DIR__ . '/../rsvp-config.php';
 
 define('APPLICATION_NAME', 'Wedding RSVP');
 define('CREDENTIALS_PATH', '~/.credentials/weddingRSVP.json');
@@ -111,6 +111,29 @@ $attending 		= (isset($argv[3]) && is_string($argv[3]) && strlen($argv[3]) > 0) 
 $num_attending 	= (isset($argv[4]) && is_string($argv[4]) && strlen($argv[4]) > 0) ? $argv[4] : null;
 $notes 			= (isset($argv[5]) && is_string($argv[5]) && strlen($argv[5]) > 0) ? $argv[5] : null;
 
+// $writeRange = "Guestlist!L2:O2";
+// // echo("What's the write range?  ". $writeRange);
+// $vals = [
+//     ["N", 2, date('Y-m-d H:i:s'), "blah"] //Yes or No, size of party, time replied, notes
+// ];
+// //(isset($notes) && is_string($notes) && strlen($notes)>0 ? $notes : null)
+// $body = new Google_Service_Sheets_ValueRange([
+//   'values' => $vals
+// ]);
+// $params = [
+//   'valueInputOption' => "USER_ENTERED"
+// ];
+// // echo("SPREADSHEET_ID is: ". $spreadsheetId);
+// // echo("writeRange is: ". $writeRange);
+// // echo("params is: ". $params);
+// // echo("attending is: ". $attending);
+// // echo("num_attending is: ". $num_attending);
+// // exit();
+// $result = $service->spreadsheets_values->update($spreadsheetId, $writeRange, $body, $params);
+// printf("%d cells updated.", $result->getUpdatedCells());
+
+// exit();
+
 function confirm($inviteCode, $attending, $num_attending, $notes){
 	global $spreadsheetId, $service, $values;
 	if(isset($attending) && is_string($attending) && isset($num_attending) && is_numeric($num_attending)){
@@ -118,10 +141,10 @@ function confirm($inviteCode, $attending, $num_attending, $notes){
 			// $service = $initSheet();
 			foreach ($values as $i => $row) {
 				if (isset($row[10]) && $row[10] == $inviteCode){
-					echo("Row: ". $i."\n");
-					$r = $i+1; //true row number
+					// echo("Row: ". $i."\n");
+					$r = $i+1; //true row number (accounting for header row)
 					$writeRange = "Guestlist!L".$r.":O".$r;
-					echo("What's the write range?  ". $writeRange);
+					// echo("What's the write range?  ". $writeRange);
 					$vals = [
 					    [$attending, $num_attending, date('Y-m-d H:i:s'), "blah"] //Yes or No, size of party, time replied, notes
 					];
@@ -132,7 +155,14 @@ function confirm($inviteCode, $attending, $num_attending, $notes){
 					$params = [
 					  'valueInputOption' => "USER_ENTERED"
 					];
+					// echo("SPREADSHEET_ID is: ". $spreadsheetId);
+					// echo("writeRange is: ". $writeRange);
+					// echo("params is: ". $params);
+					// echo("attending is: ". $attending);
+					// echo("num_attending is: ". $num_attending);
+					// exit();
 					$result = $service->spreadsheets_values->update($spreadsheetId, $writeRange, $body, $params);
+					echo($result->updatedData);
 					printf("%d cells updated.", $result->getUpdatedCells());
 				}
 			}
