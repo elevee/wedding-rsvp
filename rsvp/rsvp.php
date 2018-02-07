@@ -93,6 +93,7 @@ $spreadsheetId = $SPREADSHEET_ID;
 $range = 'Guestlist!A:O';
 $response = $service->spreadsheets_values->get($spreadsheetId, $range);
 $values = $response->getValues();
+
 // if (count($values) == 0) {
 //   print "No data found.\n";
 // } else {
@@ -134,8 +135,33 @@ $notes 			= (isset($argv[5]) && is_string($argv[5]) && strlen($argv[5]) > 0) ? $
 
 // exit();
 
+
 function confirm($inviteCode, $attending, $num_attending, $notes){
 	global $spreadsheetId, $service, $values;
+	
+
+	$writeRange = "Guestlist!L2:M2";
+	$vals = [
+	    [$attending] //Yes or No, size of party, time replied, notes
+	];
+	$body = new Google_Service_Sheets_ValueRange([
+	  'values' => $vals
+	]);
+	$params = [
+	  'valueInputOption' => "USER_ENTERED"
+	];
+	// echo("SPREADSHEET_ID is: ". $spreadsheetId);
+	// echo("writeRange is: ". $writeRange);
+	// echo("params is: ". $params);
+	echo("attending is: ". $attending);
+	// echo("num_attending is: ". $num_attending);
+	// exit();
+	$result = $service->spreadsheets_values->update($spreadsheetId, $writeRange, $body, $params);
+	echo($result->updatedData);
+	printf("%d cells updated.", $result->getUpdatedCells());
+
+	exit();
+
 	if(isset($attending) && is_string($attending) && isset($num_attending) && is_numeric($num_attending)){
 		if(isset($inviteCode) && is_string($inviteCode) && strlen($inviteCode) > 0){
 			// $service = $initSheet();
