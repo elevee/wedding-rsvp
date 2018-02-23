@@ -6,14 +6,16 @@ require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/../rsvp-config.php';
 
 define('APPLICATION_NAME', 'Wedding RSVP');
-define('CREDENTIALS_PATH', '~/.credentials/weddingRSVP.json');
+define('CREDENTIALS_PATH', __DIR__ . '/.credentials/weddingRSVP.json');
 define('CLIENT_SECRET_PATH', __DIR__ . '/client_secret.json');
 // If modifying these scopes, delete your previously saved credentials
 // at ~/.credentials/sheets.googleapis.com-php-quickstart.json
 define('SCOPES', implode(' ', array(
   Google_Service_Sheets::SPREADSHEETS)
 ));
-
+// echo(CREDENTIALS_PATH);
+// echo(CLIENT_SECRET_PATH);
+// exit();
 if (php_sapi_name() != 'cli') {
   throw new Exception('This application must be run on the command line.');
 }
@@ -22,43 +24,44 @@ if (php_sapi_name() != 'cli') {
  * Returns an authorized API client.
  * @return Google_Client the authorized client object
  */
-// function getClient() {
-//   $client = new Google_Client();
-//   $client->setApplicationName(APPLICATION_NAME);
-//   $client->setScopes(SCOPES);
-//   $client->setAuthConfig(CLIENT_SECRET_PATH);
-//   $client->setAccessType('offline');
+function getClient() {
+  $client = new Google_Client();
+  $client->setApplicationName(APPLICATION_NAME);
+  $client->setScopes(SCOPES);
+  $client->setAuthConfig(CLIENT_SECRET_PATH);
+  $client->setAccessType('offline');
+  // $client->setRedirectUri('http://www.levinelavidaloca.com/');
 
-//   // Load previously authorized credentials from a file.
-//   $credentialsPath = expandHomeDirectory(CREDENTIALS_PATH);
-//   if (file_exists($credentialsPath)) {
-//     $accessToken = json_decode(file_get_contents($credentialsPath), true);
-//   } else {
-//     // Request authorization from the user.
-//     $authUrl = $client->createAuthUrl();
-//     printf("Open the following link in your browser:\n%s\n", $authUrl);
-//     print 'Enter verification code: ';
-//     $authCode = trim(fgets(STDIN));
+  // Load previously authorized credentials from a file.
+  $credentialsPath = expandHomeDirectory(CREDENTIALS_PATH);
+  if (file_exists($credentialsPath)) {
+    $accessToken = json_decode(file_get_contents($credentialsPath), true);
+  } else {
+    // Request authorization from the user.
+    $authUrl = $client->createAuthUrl();
+    printf("Open the following link in your browser:\n%s\n", $authUrl);
+    print 'Enter verification code: ';
+    $authCode = trim(fgets(STDIN));
 
-//     // Exchange authorization code for an access token.
-//     $accessToken = $client->fetchAccessTokenWithAuthCode($authCode);
+    // Exchange authorization code for an access token.
+    $accessToken = $client->fetchAccessTokenWithAuthCode($authCode);
 
-//     // Store the credentials to disk.
-//     if(!file_exists(dirname($credentialsPath))) {
-//       mkdir(dirname($credentialsPath), 0700, true);
-//     }
-//     file_put_contents($credentialsPath, json_encode($accessToken));
-//     printf("Credentials saved to %s\n", $credentialsPath);
-//   }
-//   $client->setAccessToken($accessToken);
+    // Store the credentials to disk.
+    if(!file_exists(dirname($credentialsPath))) {
+      mkdir(dirname($credentialsPath), 0700, true);
+    }
+    file_put_contents($credentialsPath, json_encode($accessToken));
+    printf("Credentials saved to %s\n", $credentialsPath);
+  }
+  $client->setAccessToken($accessToken);
 
-//   // Refresh the token if it's expired.
-//   if ($client->isAccessTokenExpired()) {
-//     $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
-//     file_put_contents($credentialsPath, json_encode($client->getAccessToken()));
-//   }
-//   return $client;
-// }
+  // Refresh the token if it's expired.
+  if ($client->isAccessTokenExpired()) {
+    $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
+    file_put_contents($credentialsPath, json_encode($client->getAccessToken()));
+  }
+  return $client;
+}
 
 /**
  * Expands the home directory alias '~' to the full path.
@@ -77,15 +80,16 @@ function expandHomeDirectory($path) {
 // parse_str(implode('&', array_slice($argv, 1)), $_GET);
 // echo("GET VARS:\n");
 // print_r($_GET);
-// Get the API client and construct the service object.
-// $client = getClient();
 
-$client = new Google_Client();
-$client->setApplicationName(APPLICATION_NAME);
-$client->setScopes(SCOPES);
-$api_key = $API_KEY;
-$client->setDeveloperKey($api_key);
-$client->setAccessType("offline");
+// Get the API client and construct the service object.
+$client = getClient();
+
+// $client = new Google_Client();
+// $client->setApplicationName(APPLICATION_NAME);
+// $client->setScopes(SCOPES);
+// $api_key = $API_KEY;
+// $client->setDeveloperKey($api_key);
+// $client->setAccessType("offline");
 $service = new Google_Service_Sheets($client);
 
 // Get the values from the spreadsheet
@@ -104,13 +108,14 @@ $values = $response->getValues();
 //   }
 // }
 
-$method = isset($argv[1]) && is_string($argv[1]) && strlen($argv[1]) > 0 ? $argv[1] : null;;
+$method = isset($argv[1]) && is_string($argv[1]) && strlen($argv[1]) > 0 ? $argv[1] : null;
 //isset($_SERVER['REQUEST_METHOD']) && is_string($_SERVER['REQUEST_METHOD']) && in_array($_SERVER['REQUEST_METHOD'], array("GET", "POST")) ? $_SERVER['REQUEST_METHOD'] : "GET"
-	// $inviteCode = $_POST['code'];
 $inviteCode 	= (isset($argv[2]) && is_string($argv[2]) && strlen($argv[2]) > 0) ? $argv[2] : null;
 $attending 		= (isset($argv[3]) && is_string($argv[3]) && strlen($argv[3]) > 0) ? $argv[3] : null;
 $num_attending 	= (isset($argv[4]) && is_string($argv[4]) && strlen($argv[4]) > 0) ? $argv[4] : null;
 $notes 			= (isset($argv[5]) && is_string($argv[5]) && strlen($argv[5]) > 0) ? $argv[5] : null;
+
+
 
 // $writeRange = "Guestlist!L2:O2";
 // // echo("What's the write range?  ". $writeRange);
@@ -136,43 +141,19 @@ $notes 			= (isset($argv[5]) && is_string($argv[5]) && strlen($argv[5]) > 0) ? $
 // exit();
 
 
-function confirm($inviteCode, $attending, $num_attending, $notes){
+function confirm($task){
 	global $spreadsheetId, $service, $values;
-	
-
-	$writeRange = "Guestlist!L2:M2";
-	$vals = [
-	    [$attending] //Yes or No, size of party, time replied, notes
-	];
-	$body = new Google_Service_Sheets_ValueRange([
-	  'values' => $vals
-	]);
-	$params = [
-	  'valueInputOption' => "USER_ENTERED"
-	];
-	// echo("SPREADSHEET_ID is: ". $spreadsheetId);
-	// echo("writeRange is: ". $writeRange);
-	// echo("params is: ". $params);
-	echo("attending is: ". $attending);
-	// echo("num_attending is: ". $num_attending);
-	// exit();
-	$result = $service->spreadsheets_values->update($spreadsheetId, $writeRange, $body, $params);
-	echo($result->updatedData);
-	printf("%d cells updated.", $result->getUpdatedCells());
-
-	exit();
-
-	if(isset($attending) && is_string($attending) && isset($num_attending) && is_numeric($num_attending)){
-		if(isset($inviteCode) && is_string($inviteCode) && strlen($inviteCode) > 0){
+	if(isset($task["attending"]) && is_string($task["attending"]) /* && isset($task["num_attending"]) && is_numeric($task["num_attending"])*/){
+		if(isset($task["invite_code"]) && is_string($task["invite_code"]) && strlen($task["invite_code"]) > 0){
 			// $service = $initSheet();
 			foreach ($values as $i => $row) {
-				if (isset($row[10]) && $row[10] == $inviteCode){
+				if (isset($row[10]) && $row[10] == $task["invite_code"]){
 					// echo("Row: ". $i."\n");
 					$r = $i+1; //true row number (accounting for header row)
 					$writeRange = "Guestlist!L".$r.":O".$r;
 					// echo("What's the write range?  ". $writeRange);
 					$vals = [
-					    [$attending, $num_attending, date('Y-m-d H:i:s'), "blah"] //Yes or No, size of party, time replied, notes
+					    [$task["attending"], Google_Model::NULL_VALUE, date('Y-m-d H:i:s'), stripcslashes($task["notes"])] //Yes or No, size of party, time replied, notes
 					];
 					//(isset($notes) && is_string($notes) && strlen($notes)>0 ? $notes : null)
 					$body = new Google_Service_Sheets_ValueRange([
@@ -184,15 +165,22 @@ function confirm($inviteCode, $attending, $num_attending, $notes){
 					// echo("SPREADSHEET_ID is: ". $spreadsheetId);
 					// echo("writeRange is: ". $writeRange);
 					// echo("params is: ". $params);
-					// echo("attending is: ". $attending);
-					// echo("num_attending is: ". $num_attending);
+					// echo("attending is: ". $task["attending"]);
+					// echo("num_attending is: ". $task["num_attending"]);
 					// exit();
 					$result = $service->spreadsheets_values->update($spreadsheetId, $writeRange, $body, $params);
-					echo($result->updatedData);
-					printf("%d cells updated.", $result->getUpdatedCells());
+					// echo($result->updatedData);
+					// printf("%d cells updated.", $result->getUpdatedCells());
+					$output = array(
+						"status" => "SUCCESS",
+						"responseText" => "Thank you! Your RSVP has been recorded."
+					);
+					echo json_encode($output);
 				}
 			}
 		}
+	} else {
+		echo("Either attending or num_attending is not formatted correctly");
 	}
 	// $attending 			= "N";//(isset($_POST["attending"]) && is_bool($_POST["attending"]) ? $_POST["attending"] : null);
 	// $num_attending 		= 50;//(isset($_POST["size"]) && strlen(trim($_POST["size"])) > 0 ? trim($_POST["size"]) : null);
@@ -241,12 +229,17 @@ if($method === "GET"){
 }
 
 if($method === "POST"){
-	// echo("Invite code: ". $inviteCode."\n");
-	// echo("Attending: ". $attending)."\n";
-	// echo("Num attending: ". $num_attending)."\n";
-	// echo("Notes: ". $notes)."\n";
-	// echo("Calling: confirm(".$inviteCode.", ".$attending.", ".$num_attending.", ".$notes.")");
-	confirm($inviteCode, $attending, $num_attending, $notes);
+	$task = (isset($argv[2]) && is_numeric($argv[2]) && strlen($argv[2]) > 0) ? $argv[2] : null;
+	// echo("Task: ". $task."\n");
+	if($task){
+		$taskFile = sprintf("%s/../public_html/tasks/%d.json", __DIR__, $task);
+		if($_task = json_decode(file_get_contents($taskFile), true /*assoc*/)){
+			// echo("Invite code: ". $_task["invite_code"]."\n");
+			confirm($_task);
+		} else {
+			echo("Couldn't read or decode task file.");
+		}
+	}
 }
 
 // if($method === "POST"){

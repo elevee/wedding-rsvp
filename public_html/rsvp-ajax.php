@@ -37,14 +37,44 @@ if($method === "GET"){
 }
 
 if($method === "POST"){
+	error_log("POST Variables:");
+	error_log($_POST["inviteCode"]."\n");
+	error_log($_POST["type"]);
 	if($_POST["type"] !== null && $_POST["type"] === "confirm"){
-		// echo("We inside the type");	
-		// print_r($_POST);
-		if(!is_null($_POST["inviteCode"]) && is_string($_POST["inviteCode"])){
-			$cmd = "php -f ../rsvp/rsvp.php ".$method." ".trim($_POST["inviteCode"])." ".$_POST["attending"]." ".$_POST["num_attending"]." \"".addslashes($_POST["notes"])."\"";
-			
-			// echo("Calling ".$cmd."\n");
-			echo(exec($cmd)); 
+		$taskId 	= time();
+		$tasks_path = sprintf("%s/tasks", __DIR__);
+		$filename 	= sprintf("%s/%d.json", $tasks_path, $taskId); //timestamped task id
+		// echo($filename);
+		$data = array(
+			"task_id" 		=> $taskId,
+			"invite_code" 	=> trim($_POST["inviteCode"]),
+			"attending" 	=> ((isset($_POST["attending"]) && $_POST["attending"] == "yes") ? "Y" : "N"),
+			"notes"			=> addslashes($_POST["notes"])
+		);
+		// "num_attending" => intval($_POST["num_attending"]),
+
+		// print_r($data);
+		// exit();
+		
+		if(!file_exists($tasks_path)){ //create tasks folder if one doesn't already exist
+			// $old = umask(0);
+			mkdir($tasks_path, 0770);
+			// umask($old);
+		}
+		if(file_exists($tasks_path)){ //defaults to 0777
+			if(file_put_contents($filename, json_encode($data))){
+				// echo("File written!: \n");
+				// print_r($_POST);
+				if(!is_null($data["invite_code"]) && is_string($data["invite_code"])){
+					$cmd = sprintf("php -f ../rsvp/rsvp.php %s %d", "POST", $taskId);
+					//$cmd = "php -f ../rsvp/rsvp.php ".$method." ".trim($_POST["inviteCode"])." ".$_POST["attending"]." ".$_POST["num_attending"]." \"".addslashes($_POST["notes"])."\"";
+					echo(exec($cmd)); 
+				}
+			} else {
+				echo("Unable to write task file. Tell Danielle or Eric!");
+			}
+		} else {
+			echo("Unable to create tasks directory.");
 		}
 	} else {
 		echo("shiz failed, cuz");
