@@ -46,12 +46,16 @@ if($method === "POST"){
 		$filename 	= sprintf("%s/%d.json", $tasks_path, $taskId); //timestamped task id
 		// echo($filename);
 		$data = array(
-			"task_id" 		=> $taskId,
-			"invite_code" 	=> trim($_POST["inviteCode"]),
-			"attending" 	=> ((isset($_POST["attending"]) && $_POST["attending"] == "yes") ? "Y" : "N"),
-			"notes"			=> addslashes($_POST["notes"])
+			"task_id" 			=> $taskId,
+			"invite_code" 		=> trim($_POST["inviteCode"]),
+			"attending" 		=> ((isset($_POST["attending"]) && $_POST["attending"] == "yes") ? "Y" : "N"),
+			"num_attending" 	=> intval($_POST["num_attending"]),
+			"attending_welcome" => isset($_POST["attending_welcome"]) ? $_POST["attending_welcome"] : null,
+			"attending_brunch"	=> isset($_POST["attending_brunch"]) ? $_POST["attending_brunch"] : null,
+			"shuttle" 			=> isset($_POST["shuttle"]) ? $_POST["shuttle"] : null,
+			"notes"				=> addslashes($_POST["notes"])
 		);
-		// "num_attending" => intval($_POST["num_attending"]),
+		// 
 
 		// print_r($data);
 		// exit();

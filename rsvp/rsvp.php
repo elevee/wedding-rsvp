@@ -94,7 +94,7 @@ $service = new Google_Service_Sheets($client);
 
 // Get the values from the spreadsheet
 $spreadsheetId = $SPREADSHEET_ID;
-$range = 'Guestlist!A:O';
+$range = 'Guestlist!A:T';
 $response = $service->spreadsheets_values->get($spreadsheetId, $range);
 $values = $response->getValues();
 
@@ -150,11 +150,19 @@ function confirm($task){
 				if (isset($row[10]) && $row[10] == $task["invite_code"]){
 					// echo("Row: ". $i."\n");
 					$r = $i+1; //true row number (accounting for header row)
-					$writeRange = "Guestlist!L".$r.":O".$r;
+					$writeRange = "Guestlist!L".$r.":T".$r;
 					// echo("What's the write range?  ". $writeRange);
-					$vals = [
-					    [$task["attending"], Google_Model::NULL_VALUE, date('Y-m-d H:i:s'), stripcslashes($task["notes"])] //Yes or No, size of party, time replied, notes
-					];
+					$vals = [[
+						$task["attending"], 
+					    $task["num_attending"],
+					    date('Y-m-d H:i:s'), 
+					    stripcslashes($task["notes"]), //Yes or No, size of party, time replied, notes
+					    $task["attending_welcome"],
+					    $task["shuttle"],
+					    Google_Model::NULL_VALUE,
+					    Google_Model::NULL_VALUE,
+					    $task["attending_brunch"]
+					]];
 					//(isset($notes) && is_string($notes) && strlen($notes)>0 ? $notes : null)
 					$body = new Google_Service_Sheets_ValueRange([
 					  'values' => $vals
@@ -171,6 +179,7 @@ function confirm($task){
 					$result = $service->spreadsheets_values->update($spreadsheetId, $writeRange, $body, $params);
 					// echo($result->updatedData);
 					// printf("%d cells updated.", $result->getUpdatedCells());
+
 					$output = array(
 						"status" => "SUCCESS",
 						"responseText" => "Thank you! Your RSVP has been recorded."
@@ -193,6 +202,7 @@ function lookup($invite_code){
 		if (count($values) == 0) {
 		  	print "No data found.\n";
 		} else {
+			$shuttles = lookupShuttles();
 			foreach ($values as $row) {
 				if (isset($row[10]) && $row[10] == $invite_code){
 					// printf("%s has the code %s\n", $row[0], $inviteCode);
@@ -201,12 +211,16 @@ function lookup($invite_code){
 
 					$output = array(
 						"status" => "SUCCESS",
+						"shuttles" => $shuttles,
 						"record" => array(
-							"name" 	 	=> $row[0],
-							"size" 	 	=> $row[1],
-							"code" 	 	=> $row[10],
-							"attending" => isset($row[11]) ? $row[11] : "Awaiting Reply",
-							"notes"		=> isset($row[14]) ? $row[14] : null,
+							"name" 	 			=> $row[0],
+							"size" 	 			=> $row[1],
+							"code" 	 			=> $row[10],
+							"attending" 		=> isset($row[11]) ? $row[11] : null,
+							"attending_welcome" => isset($row[15]) ? $row[15] : null,
+							"attending_brunch"  => isset($row[19]) ? $row[19] : null,
+							"shuttle"			=> isset($row[16]) ? $row[16] : null,
+							"notes"				=> isset($row[14]) ? $row[14] : null,
 						)
 					);
 					echo json_encode($output);
@@ -222,6 +236,19 @@ function lookup($invite_code){
 	}
 }
 
+function lookupShuttles(){
+	global $service, $spreadsheetId;
+	$shuttles = array();
+	$shuttle_response = $service->spreadsheets_values->get($spreadsheetId, "Guestlist!AB6:AF7");
+	foreach ($shuttle_response as $row) {
+		$shuttles[] = array(
+			"number" 	=> $row[0],
+			"time" 		=> $row[1],
+			"remaining" => $row[4]
+		);
+	}
+	return $shuttles;
+}
 
 
 if($method === "GET"){
