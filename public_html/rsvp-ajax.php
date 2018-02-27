@@ -47,13 +47,13 @@ if($method === "POST"){
 		// echo($filename);
 		$data = array(
 			"task_id" 			=> $taskId,
-			"invite_code" 		=> trim($_POST["inviteCode"]),
-			"attending" 		=> ((isset($_POST["attending"]) && $_POST["attending"] == "yes") ? "Y" : "N"),
-			"num_attending" 	=> intval($_POST["num_attending"]),
+			"invite_code" 		=> isset($_POST["inviteCode"]) ? trim($_POST["inviteCode"]) : null,
+			"attending" 		=> (isset($_POST["attending"]) && $_POST["attending"] == "Y") ? "Y" : "N",
+			"num_attending" 	=> isset($_POST["num_attending"]) ? intval($_POST["num_attending"]) : null,
 			"attending_welcome" => isset($_POST["attending_welcome"]) ? $_POST["attending_welcome"] : null,
 			"attending_brunch"	=> isset($_POST["attending_brunch"]) ? $_POST["attending_brunch"] : null,
 			"shuttle" 			=> isset($_POST["shuttle"]) ? $_POST["shuttle"] : null,
-			"notes"				=> addslashes($_POST["notes"])
+			"notes"				=> isset($_POST["notes"]) ? addslashes($_POST["notes"]) : null
 		);
 		// 
 

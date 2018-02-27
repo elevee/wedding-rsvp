@@ -152,17 +152,33 @@ function confirm($task){
 					$r = $i+1; //true row number (accounting for header row)
 					$writeRange = "Guestlist!L".$r.":T".$r;
 					// echo("What's the write range?  ". $writeRange);
-					$vals = [[
-						$task["attending"], 
-					    $task["num_attending"],
-					    date('Y-m-d H:i:s'), 
-					    stripcslashes($task["notes"]), //Yes or No, size of party, time replied, notes
-					    $task["attending_welcome"],
-					    $task["shuttle"],
-					    Google_Model::NULL_VALUE,
-					    Google_Model::NULL_VALUE,
-					    $task["attending_brunch"]
-					]];
+					$guest_coming = isset($task["attending"]) && $task["attending"] == "Y";
+					$vals = null;
+					if($guest_coming){
+						$vals = [[
+							$task["attending"], 
+						    $task["num_attending"],
+						    date('Y-m-d H:i:s'), 
+						    stripcslashes($task["notes"]), //Yes or No, size of party, time replied, notes
+						    $task["attending_welcome"],
+						    $task["shuttle"],
+						    Google_Model::NULL_VALUE,
+						    Google_Model::NULL_VALUE,
+						    $task["attending_brunch"]
+						]];
+					} else { //guest not attending
+						$vals = [[
+							"N", //$task["attending"], 
+						    0, //$task["num_attending"],
+						    date('Y-m-d H:i:s'), 
+						    stripcslashes($task["notes"]), //Yes or No, size of party, time replied, notes
+						    "N", //$task["attending_welcome"],
+						    "", //shuttle (overwriting if previously filled)
+						    Google_Model::NULL_VALUE,
+						    Google_Model::NULL_VALUE,
+						    "N"
+						]];
+					}
 					//(isset($notes) && is_string($notes) && strlen($notes)>0 ? $notes : null)
 					$body = new Google_Service_Sheets_ValueRange([
 					  'values' => $vals
@@ -180,9 +196,14 @@ function confirm($task){
 					// echo($result->updatedData);
 					// printf("%d cells updated.", $result->getUpdatedCells());
 
+
 					$output = array(
-						"status" => "SUCCESS",
-						"responseText" => "Thank you! Your RSVP has been recorded."
+						"status" 			=> "SUCCESS",
+						"user"				=> array(
+							"invite_code"	=> $row[10]
+						),
+						"responseHeadline" 	=> "Thank you! Your RSVP has been recorded.",
+						"responseText" 		=> ($guest_coming ? "Looking forward to seeing you up in Paso!" : "We will miss your presence!")
 					);
 					echo json_encode($output);
 				}
@@ -217,6 +238,7 @@ function lookup($invite_code){
 							"size" 	 			=> $row[1],
 							"code" 	 			=> $row[10],
 							"attending" 		=> isset($row[11]) ? $row[11] : null,
+							"num_attending" 	=> isset($row[12]) ? $row[12] : null,
 							"attending_welcome" => isset($row[15]) ? $row[15] : null,
 							"attending_brunch"  => isset($row[19]) ? $row[19] : null,
 							"shuttle"			=> isset($row[16]) ? $row[16] : null,
