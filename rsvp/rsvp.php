@@ -111,6 +111,10 @@ $values = $response->getValues();
 $method = isset($argv[1]) && is_string($argv[1]) && strlen($argv[1]) > 0 ? $argv[1] : null;
 //isset($_SERVER['REQUEST_METHOD']) && is_string($_SERVER['REQUEST_METHOD']) && in_array($_SERVER['REQUEST_METHOD'], array("GET", "POST")) ? $_SERVER['REQUEST_METHOD'] : "GET"
 $inviteCode 	= (isset($argv[2]) && is_string($argv[2]) && strlen($argv[2]) > 0) ? $argv[2] : null;
+$zipCode		= null;
+if($method == "GET"){
+	$zipCode = (isset($argv[3]) && is_string($argv[3]) && strlen($argv[3]) > 0) ? $argv[3] : null;
+}
 $attending 		= (isset($argv[3]) && is_string($argv[3]) && strlen($argv[3]) > 0) ? $argv[3] : null;
 $num_attending 	= (isset($argv[4]) && is_string($argv[4]) && strlen($argv[4]) > 0) ? $argv[4] : null;
 $notes 			= (isset($argv[5]) && is_string($argv[5]) && strlen($argv[5]) > 0) ? $argv[5] : null;
@@ -216,16 +220,16 @@ function confirm($task){
 	// $num_attending 		= 50;//(isset($_POST["size"]) && strlen(trim($_POST["size"])) > 0 ? trim($_POST["size"]) : null);
 }
 
-function lookup($invite_code){
+function lookup($invite_code, $zip_code){
 	global $values;
-	if(isset($invite_code) && is_string($invite_code) && strlen($invite_code) > 0){
+	if(isset($invite_code) && is_string($invite_code) && strlen($invite_code) > 0 && isset($zip_code) && is_string($zip_code) && strlen($zip_code) > 0){
 		// $service = initSheet();
 		if (count($values) == 0) {
 		  	print "No data found.\n";
 		} else {
 			$shuttles = lookupShuttles();
 			foreach ($values as $row) {
-				if (isset($row[10]) && $row[10] == $invite_code){
+				if ((isset($row[10]) && $row[10] == $invite_code) && (isset($row[8]) && substr($row[8], 0, 5) == substr($zip_code, 0, 5))){
 					// printf("%s has the code %s\n", $row[0], $inviteCode);
 					// print_r($row);
 					// echo("YAY");
@@ -249,13 +253,13 @@ function lookup($invite_code){
 					exit();
 				} 
 			}
-		  	$output = array(
-				"status"	=> "ERROR",
-				"message"	=> "No guest(s) found under that invite code. Please check spelling and try again."
-			);
-			echo json_encode($output);
 		}
 	}
+	$output = array(
+		"status"	=> "ERROR",
+		"message"	=> "No guest(s) found under that invite code/zip code combination. Please check spelling and try again."
+	);
+	echo json_encode($output);
 }
 
 function lookupShuttles(){
@@ -274,7 +278,7 @@ function lookupShuttles(){
 
 
 if($method === "GET"){
-	lookup($inviteCode);
+	lookup($inviteCode, $zipCode);
 }
 
 if($method === "POST"){
