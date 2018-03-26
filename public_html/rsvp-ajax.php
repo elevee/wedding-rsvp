@@ -27,7 +27,7 @@ if($method === "GET"){
 	if($_GET["type"] !== null && $_GET["type"] === "lookup"){
 		// echo("We inside the type");
 		if(!is_null($_GET["query"]) && is_string($_GET["query"])){
-			$cmd = "php -f ../rsvp/rsvp.php ".$method." ".trim($_GET["query"]);
+			$cmd = "php -f ../rsvp/rsvp.php ".$method." ".trim($_GET["query"])." ".trim($_GET["zipCode"]);
 			// echo("Calling ".$cmd."\n");
 			echo(exec($cmd));
 		}
@@ -48,6 +48,7 @@ if($method === "POST"){
 		$data = array(
 			"task_id" 			=> $taskId,
 			"invite_code" 		=> isset($_POST["inviteCode"]) ? trim($_POST["inviteCode"]) : null,
+			"email"				=> filter_var($_POST["email"], FILTER_VALIDATE_EMAIL) ? trim($_POST["email"]) : null,
 			"attending" 		=> (isset($_POST["attending"]) && $_POST["attending"] == "Y") ? "Y" : "N",
 			"num_attending" 	=> isset($_POST["num_attending"]) ? intval($_POST["num_attending"]) : null,
 			"attending_welcome" => isset($_POST["attending_welcome"]) ? $_POST["attending_welcome"] : null,

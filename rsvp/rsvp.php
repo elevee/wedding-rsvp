@@ -154,12 +154,19 @@ function confirm($task){
 				if (isset($row[10]) && $row[10] == $task["invite_code"]){
 					// echo("Row: ". $i."\n");
 					$r = $i+1; //true row number (accounting for header row)
-					$writeRange = "Guestlist!L".$r.":T".$r;
+					$writeRange = "Guestlist!E".$r.":T".$r;
 					// echo("What's the write range?  ". $writeRange);
 					$guest_coming = isset($task["attending"]) && $task["attending"] == "Y";
 					$vals = null;
 					if($guest_coming){
 						$vals = [[
+							isset($task["email"]) && strlen($task["email"]) > 0 ? $task["email"] : Google_Model::NULL_VALUE,
+							Google_Model::NULL_VALUE,
+							Google_Model::NULL_VALUE,
+							Google_Model::NULL_VALUE,
+							Google_Model::NULL_VALUE,
+							Google_Model::NULL_VALUE,
+							Google_Model::NULL_VALUE,
 							$task["attending"], 
 						    $task["num_attending"],
 						    date('Y-m-d H:i:s'), 
@@ -172,6 +179,13 @@ function confirm($task){
 						]];
 					} else { //guest not attending
 						$vals = [[
+							isset($task["email"]) && strlen($task["email"]) > 0 ? $task["email"] : Google_Model::NULL_VALUE,
+							Google_Model::NULL_VALUE,
+							Google_Model::NULL_VALUE,
+							Google_Model::NULL_VALUE,
+							Google_Model::NULL_VALUE,
+							Google_Model::NULL_VALUE,
+							Google_Model::NULL_VALUE,
 							"N", //$task["attending"], 
 						    0, //$task["num_attending"],
 						    date('Y-m-d H:i:s'), 
@@ -241,6 +255,7 @@ function lookup($invite_code, $zip_code){
 							"name" 	 			=> $row[0],
 							"size" 	 			=> $row[1],
 							"code" 	 			=> $row[10],
+							"email"				=> $row[4],
 							"attending" 		=> isset($row[11]) ? $row[11] : null,
 							"num_attending" 	=> isset($row[12]) ? $row[12] : null,
 							"attending_welcome" => isset($row[15]) ? $row[15] : null,
