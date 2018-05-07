@@ -12,28 +12,31 @@ final class ConfirmTest extends TestCase {
     	$client 	= getClient();
     	$service 	= new Google_Service_Sheets($client);
     	$sheet_id 	= isProduction(false);
-    	$range 		= "Guestlist!L2:Q";
-    	$requestBody = new Google_Service_Sheets_ClearValuesRequest();
+    	$ranges		= array("Guestlist!E2:E", "Guestlist!L2:Q");
+    	$requestBody = new Google_Service_Sheets_BatchClearValuesRequest(array("ranges" => $ranges));
     	try{
-			$response = $service->spreadsheets_values->clear($sheet_id, $range, $requestBody);
+			$response = $service->spreadsheets_values->batchClear($sheet_id, $requestBody);
 		} catch(Exception $e){
 			echo("Caught exception: ". $e->getMessage()."\n");
 		}
     }
 
 	public function testConfirmNo(){
-        // $this->markTestIncomplete("not yet implemented");
-        $inputData = array(
-			"testing" 		=> true,
-			"invite_code" 	=> "BEAR",
-			"zip_code" 		=> "90034",
-			"attending"		=> "N",
+        $input = array(
+			"testing" 			=> true,
+			"invite_code" 		=> "BEAR",
+			"email"				=> "test@test.com",
+			"zip_code" 			=> "90034",
+			"attending"			=> "N",
+			// "attending_welcome" => "N",
+			// "attending_brunch"  => "N",
 			"notes"			=> "This is the greatest test, ever.",
 		);
 
-        $input = confirm($inputData);
-        // $input = isProduction(false);
-		// $this->assertEquals($output["status"], "SUCCESS");
+        $output = confirm($input);
+        //verify rersponse output
+		$this->assertEquals($output["status"], "SUCCESS");
+		$this->assertEquals($output["responseText"], "We will miss your presence!");
 
         // (
         //     [0] => Guest(s)
@@ -57,41 +60,55 @@ final class ConfirmTest extends TestCase {
         //     [18] => Starbucks Name
         //     [19] => Brunch?
         // )
+		//verify changes in test DB
 		$vals = lookup(array("testing" => true));
 		foreach ($vals as $guest) {
-			if($guest[10] === $input["invite_code"]){
-				$this->assertEquals($guest[11], $inputData["attending"]);
+			if(isset($guest[10]) && $guest[10] === $input["invite_code"]){
+				$this->assertEquals($guest[11], $input["attending"]);
+				$this->assertEquals($guest[4], $input["email"]);
+				$this->assertEquals($guest[12], 0); //num attending
+				$this->assertEquals($guest[14], $input["notes"]);
+				$this->assertEquals($guest[15], "N"); //attending welcome
+				$this->assertEquals($guest[19], "N"); //attending brunch
 			}
 		}
-		// print_r($vals);
-//     //     $inviteCode = "BEAR";
-//     //     $output = confirm(array(
-//     //         "task_id" => 1517992104,
-//     //         "invite_code" => $inviteCode,
-//     //         "attending" => "N",
-//     //         "num_attending" => "30",
-//     //         "notes" => "Ain't no thang, dawg!"
-//     //     ));
-//     //     print_r($output);
-//     //     // exit();
-//     //     $lookup = json_decode(lookup(array("invite_code" => $inviteCode, "bypass_zip" => true), true));
-
-
-//     //     unset($inviteCode);
     }
     public function testConfirmYes(){
-    	$this->markTestIncomplete("not yet implemented");
-        // $this->assertEquals(
-        //     'user@example.com',
-        //     Email::fromString('user@example.com')
-        // );
+    	// $this->markTestIncomplete("not yet implemented");
+    	$input = array(
+			"testing" 			=> true,
+			"invite_code" 		=> "BEAR",
+			"email"				=> "test@test.com",
+			"zip_code" 			=> "90034",
+			"attending"			=> "Y",
+			"num_attending"		=> 1,
+			"shuttle"			=> 2,
+			"attending_welcome" => "Y",
+			"attending_brunch"  => "Y",
+			"notes"				=> "Oh, I'm comin alright. Hide yo kids, hide yo wife.",
+		);
+
+        $output = confirm($input);
+        //verify rersponse output
+		$this->assertEquals($output["status"], "SUCCESS");
+		$this->assertEquals($output["responseText"], "Looking forward to seeing you up in Paso!");
+
+		//verify changes in test DB
+		$vals = lookup(array("testing" => true));
+		foreach ($vals as $guest) {
+			if(isset($guest[10]) && $guest[10] === $input["invite_code"]){
+				$this->assertEquals($guest[11], $input["attending"]);
+				$this->assertEquals($guest[4], $input["email"]);
+				$this->assertEquals($guest[12], $input["num_attending"]); //num attending
+				$this->assertEquals($guest[16], $input["shuttle"]);
+				$this->assertEquals($guest[15], $input["attending_welcome"]);
+				$this->assertEquals($guest[19], $input["attending_brunch"]);
+				$this->assertEquals($guest[14], $input["notes"]);
+			}
+		}
     }
     public function testRsvpWithoutRequiredArguments(){
         $this->markTestIncomplete("not yet implemented");
-        // $this->assertEquals(
-        //     'user@example.com',
-        //     Email::fromString('user@example.com')
-        // );
     }
 }
 

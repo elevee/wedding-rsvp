@@ -443,8 +443,10 @@ if($method === "POST"){
 		$taskFile = sprintf("%s/../public_html/tasks/%d.json", __DIR__, $task);
 		if($_task = json_decode(file_get_contents($taskFile), true /*assoc*/)){
 			// echo("Invite code: ". $_task["invite_code"]."\n");
-			confirm($_task);
-			// sendEmail($_task);
+			$output = confirm($_task);
+			if(isset($output["status"]) && $output["status"] === "SUCCESS"){
+				// sendEmail($_task);
+			}
 		} else {
 			echo("Couldn't read or decode task file.");
 		}
