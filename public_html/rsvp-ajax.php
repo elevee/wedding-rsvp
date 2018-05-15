@@ -32,7 +32,7 @@ if($method === "GET"){
 			echo(exec($cmd));
 		}
 	} else {
-		echo("shiz failed, cuz");
+		echo("Please provide a type of GET request");
 	}
 }
 

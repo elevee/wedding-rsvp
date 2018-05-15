@@ -12,7 +12,7 @@ final class ConfirmTest extends TestCase {
     	$client 	= getClient();
     	$service 	= new Google_Service_Sheets($client);
     	$sheet_id 	= isProduction(false);
-    	$ranges		= array("Guestlist!E2:E", "Guestlist!L2:Q");
+    	$ranges		= array("Guestlist!E2:E", "Guestlist!M2:R", "Guestlist!U2:U");
     	$requestBody = new Google_Service_Sheets_BatchClearValuesRequest(array("ranges" => $ranges));
     	try{
 			$response = $service->spreadsheets_values->batchClear($sheet_id, $requestBody);
@@ -44,32 +44,33 @@ final class ConfirmTest extends TestCase {
         //     [2] => STD
         //     [3] => Category
         //     [4] => Email
-        //     [5] => Street
-        //     [6] => City
-        //     [7] => State
-        //     [8] => Zip
-        //     [9] => Invite sent?
-        //     [10] => Code
-        //     [11] => Attending?
-        //     [12] => # Attending
-        //     [13] => Date RSVPed
-        //     [14] => Guest Notes
-        //     [15] => Welcome Dinner?
-        //     [16] => Shuttle #
-        //     [17] => Table
-        //     [18] => Starbucks Name
-        //     [19] => Brunch?
+        //     [5] => Street 1
+        //     [6] => Street 2
+        //     [7] => City
+        //     [8] => State
+        //     [9] => Zip
+        //     [10] => Invite sent?
+        //     [11] => Code
+        //     [12] => Attending?
+        //     [13] => # Attending
+        //     [14] => Date RSVPed
+        //     [15] => Guest Notes
+        //     [16] => Welcome Dinner?
+        //     [17] => Shuttle #
+        //     [18] => Table
+        //     [19] => Starbucks Name
+        //     [20] => Brunch?
         // )
 		//verify changes in test DB
 		$vals = lookup(array("testing" => true));
 		foreach ($vals as $guest) {
-			if(isset($guest[10]) && $guest[10] === $input["invite_code"]){
-				$this->assertEquals($guest[11], $input["attending"]);
+			if(isset($guest[11]) && $guest[11] === $input["invite_code"]){
+				$this->assertEquals($guest[12], $input["attending"]);
 				$this->assertEquals($guest[4], $input["email"]);
-				$this->assertEquals($guest[12], 0); //num attending
-				$this->assertEquals($guest[14], $input["notes"]);
-				$this->assertEquals($guest[15], "N"); //attending welcome
-				$this->assertEquals($guest[19], "N"); //attending brunch
+				$this->assertEquals($guest[13], 0); //num attending
+				$this->assertEquals($guest[15], $input["notes"]);
+				$this->assertEquals($guest[16], "N"); //attending welcome
+				$this->assertEquals($guest[20], "N"); //attending brunch
 			}
 		}
     }
@@ -84,7 +85,8 @@ final class ConfirmTest extends TestCase {
 			"num_attending"		=> 1,
 			"shuttle"			=> 2,
 			"attending_welcome" => "Y",
-			"attending_brunch"  => "Y",
+			// "attending_brunch"  => "Y",
+			"attending_brunch"  => "N",
 			"notes"				=> "Oh, I'm comin alright. Hide yo kids, hide yo wife.",
 		);
 
@@ -95,15 +97,18 @@ final class ConfirmTest extends TestCase {
 
 		//verify changes in test DB
 		$vals = lookup(array("testing" => true));
+
 		foreach ($vals as $guest) {
-			if(isset($guest[10]) && $guest[10] === $input["invite_code"]){
-				$this->assertEquals($guest[11], $input["attending"]);
+			if(isset($guest[11]) && $guest[11] === $input["invite_code"]){
+				echo("We found one\n");
+				print_r($guest);
+				$this->assertEquals($guest[12], $input["attending"]);
 				$this->assertEquals($guest[4], $input["email"]);
-				$this->assertEquals($guest[12], $input["num_attending"]); //num attending
-				$this->assertEquals($guest[16], $input["shuttle"]);
-				$this->assertEquals($guest[15], $input["attending_welcome"]);
-				$this->assertEquals($guest[19], $input["attending_brunch"]);
-				$this->assertEquals($guest[14], $input["notes"]);
+				$this->assertEquals($guest[13], $input["num_attending"]); //num attending
+				$this->assertEquals($guest[17], $input["shuttle"]);
+				$this->assertEquals($guest[16], $input["attending_welcome"]);
+				$this->assertEquals($guest[20], $input["attending_brunch"]);
+				$this->assertEquals($guest[15], $input["notes"]);
 			}
 		}
     }

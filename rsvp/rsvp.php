@@ -152,16 +152,17 @@ function confirm($options){
 			$values = lookup($options);
 			if(isset($values) && is_array($values) && count($values) > 0){
 				foreach ($values as $i => $row) {
-					if (isset($row[10]) && $row[10] == $options["invite_code"]){
+					if (isset($row[11]) && $row[11] == $options["invite_code"]){
 						// echo("Row: ". $i."\n");
 						$r = $i+1; //true row number (accounting for header row)
-						$writeRange = "Guestlist!E".$r.":T".$r;
+						$writeRange = "Guestlist!E".$r.":U".$r;
 						// echo("What's the write range?  ". $writeRange);
 						$guest_coming = isset($options["attending"]) && $options["attending"] == "Y";
 						$vals = null;
 						if($guest_coming){
 							$vals = [[
 								isset($options["email"]) && strlen($options["email"]) > 0 ? $options["email"] : Google_Model::NULL_VALUE,
+								Google_Model::NULL_VALUE,
 								Google_Model::NULL_VALUE,
 								Google_Model::NULL_VALUE,
 								Google_Model::NULL_VALUE,
@@ -181,6 +182,7 @@ function confirm($options){
 						} else { //guest not attending
 							$vals = [[
 								isset($options["email"]) && strlen($options["email"]) > 0 ? $options["email"] : Google_Model::NULL_VALUE,
+								Google_Model::NULL_VALUE,
 								Google_Model::NULL_VALUE,
 								Google_Model::NULL_VALUE,
 								Google_Model::NULL_VALUE,
@@ -221,7 +223,7 @@ function confirm($options){
 						$output = array(
 							"status" 			=> "SUCCESS",
 							"user"				=> array(
-								"invite_code"	=> $row[10]
+								"invite_code"	=> $row[11]
 							),
 							"responseHeadline" 	=> "Thank you! Your RSVP has been recorded.",
 							"responseText" 		=> ($guest_coming ? "Looking forward to seeing you up in Paso!" : "We will miss your presence!")
@@ -252,7 +254,7 @@ function lookup($options){
 	// $service = new Google_Service_Sheets($client);
 	// Get the values from the spreadsheet
 	// $spreadsheetId = $SPREADSHEET_ID;
-	$range = 'Guestlist!A:T';
+	$range = 'Guestlist!A:U';
 	try{
 		$response = $service->spreadsheets_values->get($sheet_id, $range);
 	} catch(Exception $e){
@@ -292,25 +294,25 @@ function lookupGuest($options){
 			} else {
 				$shuttles = lookupShuttles($sheet_id);
 				foreach ($values as $row) {
-					if ((isset($row[10]) && $row[10] == $options["invite_code"]) ){
+					if ((isset($row[11]) && $row[11] == $options["invite_code"]) ){
 						// printf("%s has the code %s\n", $row[0], $inviteCode);
 						// print_r($row);
 						// echo("YAY");
-						if((isset($options["zip_code"]) && isset($row[8]) && substr($row[8], 0, 5) == substr($options["zip_code"], 0, 5)) || isset($options["bypass_zip"]) && $options["bypass_zip"] == true){
+						if((isset($options["zip_code"]) && isset($row[9]) && substr($row[9], 0, 5) == substr($options["zip_code"], 0, 5)) || isset($options["bypass_zip"]) && $options["bypass_zip"] == true){
 							$output = array(
 								"status" => "SUCCESS",
 								"shuttles" => $shuttles,
 								"record" => array(
 									"name" 	 			=> $row[0],
 									"size" 	 			=> $row[1],
-									"code" 	 			=> $row[10],
+									"code" 	 			=> $row[11],
 									"email"				=> $row[4],
-									"attending" 		=> isset($row[11]) ? $row[11] : null,
-									"num_attending" 	=> isset($row[12]) ? $row[12] : null,
-									"attending_welcome" => isset($row[15]) ? $row[15] : null,
-									"attending_brunch"  => isset($row[19]) ? $row[19] : null,
-									"shuttle"			=> isset($row[16]) ? $row[16] : null,
-									"notes"				=> isset($row[14]) ? $row[14] : null
+									"attending" 		=> isset($row[12]) ? $row[12] : null,
+									"num_attending" 	=> isset($row[13]) ? $row[13] : null,
+									"attending_welcome" => isset($row[16]) ? $row[16] : null,
+									"attending_brunch"  => isset($row[20]) ? $row[20] : null,
+									"shuttle"			=> isset($row[17]) ? $row[17] : null,
+									"notes"				=> isset($row[15]) ? $row[15] : null
 								)
 							);
 							return json_encode($output);
@@ -332,7 +334,7 @@ function lookupGuest($options){
 function lookupShuttles($spreadsheetId){
 	global $service;
 	$shuttles = array();
-	$shuttle_response = $service->spreadsheets_values->get($spreadsheetId, "Guestlist!AB6:AF7");
+	$shuttle_response = $service->spreadsheets_values->get($spreadsheetId, "Guestlist!AC6:AG7");
 	foreach ($shuttle_response as $row) {
 		$shuttles[] = array(
 			"number" 	=> $row[0],
@@ -430,7 +432,7 @@ function sendEmail($task){
 }
 
 if($method === "GET"){
-	echo lookup(array(
+	echo lookupGuest(array(
 		"invite_code"	=> $inviteCode,
 		"zip_code"		=> $zipCode
 	));
