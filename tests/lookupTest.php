@@ -34,12 +34,32 @@ final class LookupTest extends TestCase {
         $this->assertEquals(count($record) > 0, 1);
         $this->assertEquals($record[1]["time"], "5:15 PM");
     }
+
+    public function testErroneousCodeLookup(){
+        $output = lookupGuest(array(
+            "testing"       => true,
+            "invite_code"   => "COWBOY",
+            // "bypass_zip"    => true
+        ));
+        // print_r($output);
+        $o = json_decode($output, true);
+        $this->assertEquals($o["status"], "ERROR");
+        // $this->expectException(Google_Service_Exception::class);
+    }
+
+    public function testErroneousZipLookup(){
+        $output = lookupGuest(array(
+            "testing"       => true,
+            "invite_code"   => "BEAR", //does exist
+            "zip_code"      => "90210" //wrong zip
+        ));
+        // echo("\n\n");
+        // print_r($output);
+        $o = json_decode($output, true);
+        $this->assertEquals($o["status"], "ERROR");
+    }
 }
 
 // class ExceptionTest extends TestCase {
-//     public function testErroneousLookup(){
-//         $output = lookup(array("spreadsheet_id" => "blah"));
-//         // print_r($output);
-//         $this->expectException(Google_Service_Exception::class);
-//     }
+//     
 // }

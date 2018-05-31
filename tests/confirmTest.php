@@ -100,8 +100,8 @@ final class ConfirmTest extends TestCase {
 
 		foreach ($vals as $guest) {
 			if(isset($guest[11]) && $guest[11] === $input["invite_code"]){
-				echo("We found one\n");
-				print_r($guest);
+				// echo("We found one\n");
+				// print_r($guest);
 				$this->assertEquals($guest[12], $input["attending"]);
 				$this->assertEquals($guest[4], $input["email"]);
 				$this->assertEquals($guest[13], $input["num_attending"]); //num attending

@@ -83,9 +83,13 @@ try {
     $mail->setFrom($EMAIL_USER, 'Levine HQ');
     // $mail->addAddress('joe@example.net', 'Joe User');     // Add a recipient
     $mail->addAddress('test@test.com');               // Name is optional
-    $mail->addReplyTo('noreply@example.com', 'No Reply');
+    // $mail->addReplyTo($REPLY_TO, 'No Reply');
     // $mail->addCC('cc@example.com');
-    // $mail->addBCC('bcc@example.com');
+	if(isset($EMAIL_BCC) && is_array($EMAIL_BCC) && count($EMAIL_BCC) > 0){
+		foreach ($EMAIL_BCC as $address) {
+	    	$mail->addBCC($address);
+	    }
+	}
 
     //Attachments
     // $mail->addAttachment('/var/tmp/file.tar.gz');         // Add attachments

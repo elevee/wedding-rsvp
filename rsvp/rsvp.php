@@ -285,9 +285,9 @@ function lookupGuest($options){
 		// $service = initSheet();
 		if((isset($options["zip_code"]) && is_string($options["zip_code"]) && strlen($options["zip_code"]) > 0) || (isset($options["bypass_zip"]) && $options["bypass_zip"] == true)){
 			$values = lookup(array(
-				"testing" 		=> isset($options["testing"]) ? $options["testing"] : false,
-				"invite_code" 	=> $options["invite_code"],
-				"zip_code" 		=> $options["zip_code"]
+				"testing" 		=> isset($options["testing"]) 		? $options["testing"] : false,
+				"invite_code" 	=> isset($options["invite_code"]) 	? $options["invite_code"] : null,
+				"zip_code" 		=> isset($options["zip_code"]) 		? $options["zip_code"] : null,
 			));
 			if (count($values) == 0) {
 		  		print "No data found.\n";
@@ -322,11 +322,11 @@ function lookupGuest($options){
 				}
 			}
 		}
-		
 	}
 	$output = array(
-		"status"	=> "ERROR",
-		"message"	=> "No guest(s) found under that invite code/zip code combination. Please check spelling and try again."
+		"status"			=> "ERROR",
+		"responseHeadline"	=> "Error",
+		"responseText"		=> "No guest(s) found under that invite code/zip code combination. Please check spelling and try again."
 	);
 	return json_encode($output);
 }
