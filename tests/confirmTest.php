@@ -78,12 +78,13 @@ final class ConfirmTest extends TestCase {
     	// $this->markTestIncomplete("not yet implemented");
     	$input = array(
 			"testing" 			=> true,
+			"type"				=> "confirm",
 			"invite_code" 		=> "BEAR",
 			"email"				=> "test@test.com",
 			"zip_code" 			=> "90034",
 			"attending"			=> "Y",
-			"num_attending"		=> 1,
-			"shuttle"			=> 2,
+			"num_attending"		=> "1",
+			"shuttle"			=> "2",
 			"attending_welcome" => "Y",
 			// "attending_brunch"  => "Y",
 			"attending_brunch"  => "N",

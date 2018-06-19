@@ -53,9 +53,11 @@ final class UtilitiesTest extends TestCase {
                 $remaining = $shuttle["remaining"];
             }
         }
+        // echo("\n\n REMAINING is ".$remaining."Beforehand. \n");
         confirm($input);
         $output_after = lookupShuttles($sid);
 
+        // echo("\n\n REMAINING AFTER is ".$output_after[$shuttle_key]["remaining"]."\n");
         if(isset($output_after)){
             $this->assertEquals(
                 intval($remaining) - 1,

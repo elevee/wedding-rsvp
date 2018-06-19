@@ -29,9 +29,9 @@ final class LookupTest extends TestCase {
     public function testShuttleLookup(){
         global $SPREADSHEET_ID;
         $record = lookupShuttles($SPREADSHEET_ID["test"]);
-        // print_r($record);
+        print_r($record);
         // $r = json_decode($record, true);
-        $this->assertEquals(count($record) > 0, 1);
+        $this->assertEquals(1, count($record) > 0);
         $this->assertEquals($record[1]["time"], "5:15 PM");
     }
 

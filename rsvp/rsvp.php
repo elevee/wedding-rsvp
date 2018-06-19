@@ -334,7 +334,7 @@ function lookupGuest($options){
 function lookupShuttles($spreadsheetId){
 	global $service;
 	$shuttles = array();
-	$shuttle_response = $service->spreadsheets_values->get($spreadsheetId, "Guestlist!AC6:AG7");
+	$shuttle_response = $service->spreadsheets_values->get($spreadsheetId, "Stats!F2:J3");
 	foreach ($shuttle_response as $row) {
 		$shuttles[] = array(
 			"number" 	=> $row[0],
@@ -348,7 +348,7 @@ function lookupShuttles($spreadsheetId){
 function sendEmail($task){
 	global $EMAIL_USER, $EMAIL_PW, $EMAIL_SMTP, $EMAIL_BCC;
 	if(isset($task["email"]) && is_string($task["email"]) && strlen($task["email"]) > 0){
-		$response = json_decode(lookup(array(
+		$response = json_decode(lookupGuest(array(
 		   	"invite_code" => $task["invite_code"], 
 		   	"bypass_zip" => true
 		   )), true);
@@ -414,7 +414,7 @@ function sendEmail($task){
 				    );
 			    }
 			    $body .= "<br/>";
-			    $body .= ($attending ? "Looking forward," : "Love,");
+			    $body .= ("Love,");
 			    $body .= "<br/><br/>Danielle & Eric";
 
 			    $mail->Body = $body;
@@ -447,7 +447,7 @@ if($method === "POST"){
 			// echo("Invite code: ". $_task["invite_code"]."\n");
 			$output = confirm($_task);
 			if(isset($output["status"]) && $output["status"] === "SUCCESS"){
-				// sendEmail($_task);
+				sendEmail($_task);
 			}
 		} else {
 			echo("Couldn't read or decode task file.");
